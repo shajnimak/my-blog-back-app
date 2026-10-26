@@ -40,8 +40,8 @@ public class PostService {
         PostSearch criteria = PostSearch.parse(search);
         int total = postDao.count(criteria);
         int lastPage = Math.max(1, (int) ((total + (long) pageSize - 1) / pageSize));
-        if (pageNumber > lastPage) {
-            return new PostPageDto(List.of(), true, false, lastPage);
+        if (total == 0 || pageNumber > lastPage) {
+            return new PostPageDto(List.of(), pageNumber > 1, false, lastPage);
         }
 
         List<Post> posts = postDao.findAll(criteria, pageSize, (pageNumber - 1) * pageSize);
