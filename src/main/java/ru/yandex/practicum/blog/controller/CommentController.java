@@ -15,10 +15,13 @@ import ru.yandex.practicum.blog.dto.NewCommentDto;
 import ru.yandex.practicum.blog.service.CommentService;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/posts/{postId}/comments")
 public class CommentController {
+
+    private static final Pattern NUMERIC_ID = Pattern.compile("\\d{1,18}");
 
     private final CommentService commentService;
 
@@ -26,9 +29,17 @@ public class CommentController {
         this.commentService = commentService;
     }
 
+    /**
+     * Фронтенд запрашивает комментарии ещё до загрузки поста, подставляя в адрес "undefined".
+     * Ошибка в ответ на такой запрос сбрасывает на странице уже загруженный пост,
+     * поэтому для нечислового id возвращается пустой список.
+     */
     @GetMapping
-    public List<CommentDto> getComments(@PathVariable long postId) {
-        return commentService.getComments(postId);
+    public List<CommentDto> getComments(@PathVariable String postId) {
+        if (!NUMERIC_ID.matcher(postId).matches()) {
+            return List.of();
+        }
+        return commentService.getComments(Long.parseLong(postId));
     }
 
     @GetMapping("/{commentId}")

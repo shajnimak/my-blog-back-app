@@ -56,6 +56,20 @@ class CommentControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void getCommentsForUndefinedPostIdReturnsEmptyList() throws Exception {
+        // фронтенд запрашивает комментарии до загрузки поста
+        mockMvc.perform(get("/api/posts/undefined/comments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    void getCommentsForUnknownPostReturnsNotFound() throws Exception {
+        mockMvc.perform(get("/api/posts/{postId}/comments", 999_999_999L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void getComment() throws Exception {
         Comment comment = commentDao.create(postId, "Комментарий");
 
