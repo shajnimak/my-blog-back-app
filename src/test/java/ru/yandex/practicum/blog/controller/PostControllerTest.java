@@ -213,7 +213,6 @@ class PostControllerTest extends AbstractIntegrationTest {
 
     @Test
     void corsAllowsFrontendOrigin() throws Exception {
-        // фронтенд открыт на http://localhost (порт 80), а бэкенд слушает 8080
         mockMvc.perform(options("http://localhost:8080/api/posts/1")
                         .header(HttpHeaders.ORIGIN, "http://localhost")
                         .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "PUT"))

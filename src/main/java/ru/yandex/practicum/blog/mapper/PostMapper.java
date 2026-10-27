@@ -15,9 +15,6 @@ public final class PostMapper {
         return toDto(post, post.text());
     }
 
-    /**
-     * Для ленты постов: текст длиннее {@value #PREVIEW_LENGTH} символов обрезается и дополняется «…».
-     */
     public static PostDto toPreviewDto(Post post) {
         return toDto(post, preview(post.text()));
     }

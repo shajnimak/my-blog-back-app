@@ -5,12 +5,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Критерии поиска постов.
- * Строка поиска делится на слова по пробелам: слова, начинающиеся с {@code #}, считаются тегами
- * (пост должен содержать все указанные теги), остальные слова склеиваются через пробел
- * и ищутся как подстрока в названии поста без учёта регистра.
- */
 public record PostSearch(String title, Set<String> tags) {
 
     private static final String TAG_PREFIX = "#";

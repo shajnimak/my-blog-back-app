@@ -29,11 +29,6 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    /**
-     * Фронтенд запрашивает комментарии ещё до загрузки поста, подставляя в адрес "undefined".
-     * Ошибка в ответ на такой запрос сбрасывает на странице уже загруженный пост,
-     * поэтому для нечислового id возвращается пустой список.
-     */
     @GetMapping
     public List<CommentDto> getComments(@PathVariable String postId) {
         if (!NUMERIC_ID.matcher(postId).matches()) {

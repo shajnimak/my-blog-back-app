@@ -127,7 +127,6 @@ public class JdbcPostDao implements PostDao {
             params.addValue("title", "%" + escapeLike(search.title().toLowerCase(Locale.ROOT)) + "%");
         }
         if (search.hasTags()) {
-            // пост должен содержать все теги из запроса
             conditions.add("""
                     p.id IN (SELECT pt.post_id
                              FROM post_tags pt

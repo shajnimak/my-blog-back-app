@@ -43,10 +43,6 @@ public class CommentService {
         return CommentMapper.toDto(commentDao.create(postId, text));
     }
 
-    /**
-     * Комментарий ищется только по его id: фронтенд при редактировании
-     * подставляет в адрес id комментария вместо id поста.
-     */
     @Transactional
     public CommentDto updateComment(long commentId, String text) {
         validate(text);

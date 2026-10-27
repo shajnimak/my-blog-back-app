@@ -6,9 +6,6 @@ import ru.yandex.practicum.blog.model.PostSearch;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Доступ к постам. Возвращаемые посты не содержат тегов — за них отвечает {@link TagDao}.
- */
 public interface PostDao {
 
     List<Post> findAll(PostSearch search, int limit, int offset);
