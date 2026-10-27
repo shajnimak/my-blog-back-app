@@ -3,14 +3,13 @@ package ru.yandex.practicum.blog.dao;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.practicum.blog.AbstractIntegrationTest;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-class JdbcTagDaoTest extends AbstractIntegrationTest {
+class JdbcTagDaoTest extends AbstractDaoTest {
 
     @Autowired
     private TagDao tagDao;

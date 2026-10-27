@@ -3,7 +3,6 @@ package ru.yandex.practicum.blog.dao;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.practicum.blog.AbstractIntegrationTest;
 import ru.yandex.practicum.blog.model.Post;
 import ru.yandex.practicum.blog.model.PostSearch;
 
@@ -12,7 +11,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JdbcPostDaoTest extends AbstractIntegrationTest {
+class JdbcPostDaoTest extends AbstractDaoTest {
 
     @Autowired
     private PostDao postDao;

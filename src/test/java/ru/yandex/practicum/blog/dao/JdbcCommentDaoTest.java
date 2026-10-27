@@ -3,12 +3,11 @@ package ru.yandex.practicum.blog.dao;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.yandex.practicum.blog.AbstractIntegrationTest;
 import ru.yandex.practicum.blog.model.Comment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JdbcCommentDaoTest extends AbstractIntegrationTest {
+class JdbcCommentDaoTest extends AbstractDaoTest {
 
     @Autowired
     private CommentDao commentDao;
