@@ -1,42 +1,37 @@
 # my-blog-back-app
 
 Бэкенд веб-приложения «Блог». Отдаёт фронтенду REST API для работы с постами, тегами, лайками,
-картинками и комментариями. Приложение собирается в `war` и запускается в сервлет-контейнере Tomcat.
+картинками и комментариями. Приложение собирается в исполняемый jar и запускается со встроенным Tomcat.
 
 ## Стек
 
 - Java 21
-- Spring Framework 6.2 (Spring Web MVC, Spring JDBC, Spring TestContext) — **без Spring Boot**
+- Spring Boot 3.5 (Spring Web MVC, Spring Data JDBC / JdbcTemplate)
 - H2 (файловая БД для приложения, in-memory для тестов)
-- Jackson, Logback
-- Maven (сборка `war`), Maven Wrapper
-- Apache Tomcat 10.1
-- JUnit 5, Mockito, AssertJ, MockMvc
+- Gradle (Gradle Wrapper)
+- Встроенный Tomcat
+- JUnit 5, Spring Boot Test, Mockito, AssertJ, MockMvc
 
 ## Структура проекта
 
 ```
 src/main/java/ru/yandex/practicum/blog
-├── config       — Java-конфигурация Spring: AppConfig (корневой контекст), WebConfig (MVC, CORS, multipart),
-│                  DataSourceConfig (пул соединений, JdbcTemplate, транзакции, накатка schema.sql)
-├── controller   — REST-контроллеры и обработчик ошибок
-├── service      — бизнес-логика: пагинация, поиск, теги, комментарии
-├── dao          — интерфейсы DAO и их реализации на NamedParameterJdbcTemplate
-├── model        — доменные модели (Post, Comment, PostSearch)
-├── dto          — объекты запросов и ответов REST API
-├── mapper       — преобразование моделей в DTO
-└── exception    — исключения слоя сервисов
+├── BlogApplication — точка входа Spring Boot
+├── config          — WebConfig (CORS)
+├── controller      — REST-контроллеры и обработчик ошибок
+├── service         — бизнес-логика: пагинация, поиск, теги, комментарии
+├── dao             — интерфейсы DAO и их реализации на NamedParameterJdbcTemplate
+├── model           — доменные модели (Post, Comment, PostSearch)
+├── dto             — объекты запросов и ответов REST API
+├── mapper          — преобразование моделей в DTO
+└── exception       — исключения слоя сервисов
 src/main/resources
-├── application.properties — параметры подключения к БД
-├── schema.sql             — схема БД, накатывается при старте
-└── logback.xml
-src/main/webapp/WEB-INF/web.xml — поднимает корневой контекст (ContextLoaderListener) и DispatcherServlet
+├── application.properties — порт, подключение к БД, ограничения на загрузку файлов, логирование
+└── schema.sql             — схема БД, накатывается при старте
 ```
 
-Контексты Spring:
-
-- **корневой** (`AppConfig`) — сервисы, DAO, БД;
-- **веб** (`WebConfig`) — контроллеры, CORS, загрузка файлов. Дочерний по отношению к корневому.
+DataSource, `JdbcTemplate`, `NamedParameterJdbcTemplate`, менеджер транзакций, Spring MVC и загрузку файлов
+настраивает автоконфигурация Spring Boot.
 
 ## Схема БД
 
@@ -52,21 +47,21 @@ comments   (id, post_id → posts.id ON DELETE CASCADE, text)
 
 ## REST API
 
-| Метод    | Адрес                                            | Описание                                              |
-|----------|--------------------------------------------------|-------------------------------------------------------|
-| `GET`    | `/api/posts?search=...&pageNumber=1&pageSize=5`  | Лента постов с поиском и пагинацией                   |
-| `GET`    | `/api/posts/{id}`                                | Пост целиком                                          |
-| `POST`   | `/api/posts`                                     | Создание поста                                        |
-| `PUT`    | `/api/posts/{id}`                                | Редактирование поста                                  |
-| `DELETE` | `/api/posts/{id}`                                | Удаление поста вместе с комментариями                 |
-| `POST`   | `/api/posts/{id}/likes`                          | +1 лайк, в ответе новое число лайков                  |
+| Метод    | Адрес                                            | Описание                                                |
+|----------|--------------------------------------------------|---------------------------------------------------------|
+| `GET`    | `/api/posts?search=...&pageNumber=1&pageSize=5`  | Лента постов с поиском и пагинацией                     |
+| `GET`    | `/api/posts/{id}`                                | Пост целиком                                            |
+| `POST`   | `/api/posts`                                     | Создание поста                                          |
+| `PUT`    | `/api/posts/{id}`                                | Редактирование поста                                    |
+| `DELETE` | `/api/posts/{id}`                                | Удаление поста вместе с комментариями                   |
+| `POST`   | `/api/posts/{id}/likes`                          | +1 лайк, в ответе новое число лайков                    |
 | `PUT`    | `/api/posts/{id}/image`                          | Загрузка картинки (`multipart/form-data`, поле `image`) |
-| `GET`    | `/api/posts/{id}/image`                          | Картинка поста (байты)                                |
-| `GET`    | `/api/posts/{postId}/comments`                   | Комментарии поста                                     |
-| `GET`    | `/api/posts/{postId}/comments/{commentId}`       | Комментарий                                           |
-| `POST`   | `/api/posts/{postId}/comments`                   | Добавление комментария                                |
-| `PUT`    | `/api/posts/{postId}/comments/{commentId}`       | Редактирование комментария                            |
-| `DELETE` | `/api/posts/{postId}/comments/{commentId}`       | Удаление комментария                                  |
+| `GET`    | `/api/posts/{id}/image`                          | Картинка поста (байты)                                  |
+| `GET`    | `/api/posts/{postId}/comments`                   | Комментарии поста                                       |
+| `GET`    | `/api/posts/{postId}/comments/{commentId}`       | Комментарий                                             |
+| `POST`   | `/api/posts/{postId}/comments`                   | Добавление комментария                                  |
+| `PUT`    | `/api/posts/{postId}/comments/{commentId}`       | Редактирование комментария                              |
+| `DELETE` | `/api/posts/{postId}/comments/{commentId}`       | Удаление комментария                                    |
 
 **Поиск.** Строка `search` делится на слова по пробелам. Слова, начинающиеся с `#`, — это теги: пост должен
 содержать все указанные теги. Остальные слова склеиваются через пробел и ищутся как подстрока в названии поста
@@ -82,86 +77,81 @@ comments   (id, post_id → posts.id ON DELETE CASCADE, text)
 ## Требования
 
 - JDK 21
-- Apache Tomcat 10.1 (Jakarta Servlet 6.0)
-- Maven ставить не обязательно — в проекте есть Maven Wrapper (`./mvnw`)
+- Gradle ставить не нужно — в проекте есть Gradle Wrapper (`./gradlew`, на Windows `gradlew.bat`)
 
 ## Сборка
 
 ```bash
-./mvnw clean package
+./gradlew clean build
 ```
 
-Тесты запускаются при сборке. Готовый архив — `target/ROOT.war`.
-
-Если в `~/.m2/settings.xml` настроено корпоративное зеркало без доступа к Maven Central, укажите отдельный
-файл настроек: `./mvnw -s <путь к settings.xml> clean package`.
+Тесты запускаются при сборке. Исполняемый jar — `build/libs/my-blog-back-app-1.0.0-SNAPSHOT.jar`.
 
 ## Тесты
 
 ```bash
-./mvnw test
+./gradlew test
 ```
 
-- `dao` — интеграционные тесты DAO на H2 в памяти;
-- `controller` — интеграционные MVC-тесты через `MockMvc` на H2 в памяти;
-- `service` — тесты сервисов через Spring TestContext, DAO заменены моками `@MockitoBean`;
-- `model`, `mapper` — unit-тесты разбора строки поиска и обрезки текста.
+Отчёт — `build/reports/tests/test/index.html`.
 
-Интеграционные тесты наследуют `AbstractIntegrationTest`, тесты сервисов — `AbstractServiceTest`.
-Конфигурация внутри каждой группы одинаковая, поэтому TestContext Framework создаёт контексты один раз
-и дальше берёт их из кеша. Каждый интеграционный тест выполняется в транзакции, которая откатывается
-после теста, — тесты не влияют друг на друга.
+| Пакет        | Что проверяется                                | Как                                                          |
+|--------------|------------------------------------------------|--------------------------------------------------------------|
+| `dao`        | DAO на реальной БД                             | `@JdbcTest` + DAO-бины, встроенная H2 в памяти               |
+| `controller` | REST API целиком: контроллер → сервис → DAO → БД | `@SpringBootTest` + `@AutoConfigureMockMvc` + `@AutoConfigureTestDatabase` |
+| `service`    | бизнес-логика сервисов                         | `@SpringBootTest(classes = ...)`, DAO заменены `@MockitoBean` |
+| `model`, `mapper` | разбор строки поиска, обрезка текста      | JUnit 5 без Spring                                           |
 
-## Деплой в Tomcat
+Тесты каждой группы наследуют общий базовый класс (`AbstractDaoTest`, `AbstractIntegrationTest`,
+`AbstractServiceTest`), поэтому конфигурация внутри группы одинаковая и Spring создаёт на все тесты только
+три контекста, а дальше берёт их из кеша. Тесты DAO и MVC выполняются в транзакции, которая откатывается
+после каждого теста.
 
-1. Установите Tomcat 10.1: скачайте архив с https://tomcat.apache.org/download-10.cgi и распакуйте,
-   или на macOS: `brew install tomcat@10`. Каталог Tomcat дальше — `$CATALINA_HOME`
-   (для brew это `/opt/homebrew/opt/tomcat@10/libexec`).
-2. Соберите `war` (см. «Сборка»).
-3. Удалите стандартное приложение `ROOT` и скопируйте `ROOT.war` в `webapps`, чтобы API было доступно
-   по корню `http://localhost:8080/api/...`:
-   ```bash
-   rm -rf $CATALINA_HOME/webapps/ROOT
-   cp target/ROOT.war $CATALINA_HOME/webapps/
-   ```
-4. Запустите Tomcat под JDK 21:
-   ```bash
-   JAVA_HOME=<путь к JDK 21> $CATALINA_HOME/bin/catalina.sh run
-   ```
-   В логе должно появиться `Root WebApplicationContext initialized` и `Server startup in ...`.
-5. Проверьте:
-   ```bash
-   curl "http://localhost:8080/api/posts?search=&pageNumber=1&pageSize=5"
-   ```
+## Запуск
 
-Для повторного деплоя достаточно остановить Tomcat (`catalina.sh stop`), удалить из `webapps` каталог
-`ROOT` и `ROOT.war`, скопировать новый архив и снова запустить.
+```bash
+java -jar build/libs/my-blog-back-app-1.0.0-SNAPSHOT.jar
+```
 
-## Конфигурация БД
+или без сборки jar:
 
-Параметры подключения лежат в `src/main/resources/application.properties`:
+```bash
+./gradlew bootRun
+```
+
+Приложение стартует на http://localhost:8080. Проверка:
+
+```bash
+curl "http://localhost:8080/api/posts?search=&pageNumber=1&pageSize=5"
+```
+
+## Конфигурация
+
+Настройки лежат в `src/main/resources/application.properties`:
 
 ```properties
-db.url=jdbc:h2:file:~/.my-blog/blog
-db.username=blog
-db.password=blog
+server.port=8080
+spring.datasource.url=jdbc:h2:file:~/.my-blog/blog
+spring.datasource.username=blog
+spring.datasource.password=${DB_PASSWORD:blog}
+spring.sql.init.mode=always
 ```
 
 Данные хранятся в файле `~/.my-blog/blog.mv.db`. Схема (`schema.sql`) накатывается при каждом старте
 и не трогает существующие данные (`CREATE TABLE IF NOT EXISTS`).
 
-Любой параметр можно переопределить без пересборки — переменной окружения или системным свойством JVM:
+Пароль к БД передаётся переменной окружения `DB_PASSWORD` (по умолчанию `blog`). Любую другую настройку можно
+переопределить без пересборки — переменной окружения или аргументом командной строки:
 
 ```bash
-export DB_PASSWORD=secret
-# или
-export CATALINA_OPTS="-Ddb.password=secret"
+DB_PASSWORD=secret java -jar build/libs/my-blog-back-app-1.0.0-SNAPSHOT.jar
+java -jar build/libs/my-blog-back-app-1.0.0-SNAPSHOT.jar --server.port=9090
 ```
 
 ## Запуск вместе с фронтендом
 
-Фронтенд обращается к бэкенду по адресу `http://localhost:8080`. Запустите бэкенд в Tomcat, затем
-фронтенд (например, `docker compose up` в каталоге фронтенда) и откройте http://localhost.
+Фронтенд обращается к бэкенду по адресу `http://localhost:8080`. Запустите бэкенд, затем фронтенд
+(например, `docker compose up` в каталоге фронтенда) и откройте http://localhost.
 CORS для `/api/**` разрешён для любых источников.
 
 Особенности фронтенда, учтённые на бэкенде:
